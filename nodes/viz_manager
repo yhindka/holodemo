@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+import rospy
+import signal
+import sys
+import tf
+import tf2_ros
+
+from std_msgs.msg import String
+from nav_msgs.msg import Path
+from sensor_msgs.msg import JointState
+
+import numpy as np 
+
+REFERENCE_FRAME='panda_link0'
+
+class Visualization(object):
+    def __init__(self):
+        #Joint State
+        self._finger_val = .035
+        self._current_joint = [0.0,-0.4,0.0,-2.0,0.0,1.6,0.8,self._finger_val,self._finger_val]
+        self._names = ["panda_joint1", "panda_joint2","panda_joint3","panda_joint4","panda_joint5","panda_joint6","panda_joint7","panda_finger_joint1","panda_finger_joint2"]
+        self._viz_pub = rospy.Publisher("/viz/joint_states", JointState, queue_size = 5)
+        
+        #Publish init state for the robot
+        rospy.sleep(1)
+        self.publish_states()
+
+        #Simulation mode
+        self._sim = True
+
+        #Velocity for simulation
+        self._current_velocity = [0.,0.,0.,0.,0.,0.,0.,0.,0.]
+        self._freq = 200
+        self._vel_sub = rospy.Subscriber("/jacob/joint_vel", JointState, self.on_vel)
+
+    def publish_states(self):
+        joint = JointState()
+        joint.header.stamp = rospy.Time.now()
+        joint.name = self._names
+        joint.position = self._current_joint
+        self._viz_pub.publish(joint)
+
+    def run(self):
+        r = rospy.Rate(self._freq)
+        while not rospy.is_shutdown():
+            if self._sim:
+                self.move()
+            r.sleep()
+
+    def on_command(self, msg):
+        if self._sim:
+            if msg.data == "grasp":
+                self._finger_val = 0.0
+                self._current_joint[-1] = self._finger_val
+                self._current_joint[-2] = self._finger_val
+            if msg.data == "release":
+                self._finger_val = .035
+                self._current_joint[-1] = self._finger_val
+                self._current_joint[-2] = self._finger_val
+    
+    #Velocity controller
+    def on_vel(self,msg): 
+        for i,v in enumerate(msg.velocity):
+            self._current_velocity[i]=v
+
+    def move(self):
+        for i,v in enumerate(self._current_velocity):
+            self._current_joint[i]+=v/self._freq
+        self.publish_states()
+
+    def signal_handler(self, signal, frame):
+        sys.exit(0)
+
+if __name__ == "__main__":
+    rospy.init_node("simulator")
+    visualization = Visualization()
+    signal.signal(signal.SIGINT, visualization.signal_handler)
+    visualization.run()
+

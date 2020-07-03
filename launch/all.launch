@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="holodemo" type="static_publisher" name="camera_static_publisher">
+        <param name="file_name" type="string" value="transforms.yaml" />
+        <param name="transform" type="string" value="static_cloud_transform" />
+    </node>
+
+	<!--<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+		<arg name="port" value="9090" />
+	</include>-->
+
+    <node pkg="holodemo" type="viz_manager" name="viz_manager" output="screen"/>
+
+    <node pkg="holodemo" type="pandaJacob" name="pandaJacob"/>
+
+    <node pkg="holodemo" type="mover" name="mover" output="screen"/>
+
+    <node pkg="authoring" type="static_publisher" name="end_effector_static_publisher">
+        <param name="file_name" type="string" value="transforms.yaml" />
+        <param name="transform" type="string" value="sim_ee_transform" />
+    </node>
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find holodemo)/rviz/joint_viewer.rviz" />
+
+    <param name="publish_frequency" type="double" value="1000.0" />
+    <param name="tf_prefix" type="string" value="" />
+    <param name="robot_description" command="cat $(find holodemo)/urdfs/panda.urdf" />
+   
+    <!-- Robot state publisher    -->
+    <arg name="node_start_delay" default="1.0" />  
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="panda_state_publisher" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " output="screen">
+    <remap from="joint_states" to="/viz/joint_states"/>
+        <param name="publish_frequency" type="double" value="1000.0" />
+    </node>
+
+</launch>

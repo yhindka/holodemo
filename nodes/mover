@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+import rospy
+import signal
+import sys
+import math
+import tf
+import PyKDL
+import copy
+
+from geometry_msgs.msg import Twist, Pose, PoseStamped
+
+import numpy as np 
+
+
+class Mover(object):
+    def __init__(self):
+        self._tl = tf.TransformListener()
+        self._br = tf.TransformBroadcaster()
+
+        self._panda_vel_pub = rospy.Publisher("/mover/cart_vel",Twist,queue_size=5)
+        self._cube_sub = rospy.Subscriber("/cube_pose", PoseStamped, self.on_cube)
+
+        rospy.sleep(1.) # sleep a bit to make sure the TF cache is filled
+
+        self._freq = 100.
+        self.goal = None
+
+ 
+    def run(self):
+        rospy.spin()
+
+    def on_cube(self, msg):
+        msg.pose.position.y+=1
+        msg.pose.position.z+=1
+        goal = copy.deepcopy(msg)
+        goal.pose.position.x=msg.pose.position.y
+        goal.pose.position.y=msg.pose.position.z
+        goal.pose.position.z=msg.pose.position.x
+        goal.header.frame_id = "panda_link0"
+        print(goal)
+        p = goal.pose.position
+        o = goal.pose.orientation
+        self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"goal","panda_link0")
+        ee_frame = 'sim_end_effector'
+        (trans,rot) = self._tl.lookupTransform("panda_link0", ee_frame, rospy.Time(0))
+        pose = Pose()
+        pose.position.x = goal.pose.position.x-trans[0]
+        pose.position.y = goal.pose.position.y-trans[1]
+        pose.position.z = goal.pose.position.z-trans[2]
+
+        dx = math.fabs(pose.position.x)
+        dy = math.fabs(pose.position.y)
+        dz = math.fabs(pose.position.z)
+        d = np.sqrt(dx**2+dy**2+dz**2)
+
+        #From https://answers.ros.org/question/10124/relative-rotation-between-two-quaternions/
+
+        qp = PyKDL.Rotation.Quaternion(rot[0],rot[1],rot[2],rot[3])
+        current_angle = qp.GetRPY()
+
+        rot = goal.pose.orientation
+        qg = PyKDL.Rotation.Quaternion(rot.x,rot.y,rot.z,rot.w)
+        q = qg*qp.Inverse()
+
+        difference_angle = q.GetRPY()
+        angle  = list(difference_angle)
+        
+        d = current_angle[2] + difference_angle[2]
+        if d > np.pi:
+            angle[2] -= 2 * np.pi
+        if d < -np.pi:
+            angle[2] += 2 * np.pi 
+
+        max_lin = .12
+        max_rot = .6
+
+        d = np.sqrt(dx**2+dy**2+dz**2)
+        t_lin = d / max_lin
+        t_rot = max([np.fabs(angle[0])/max_rot,np.fabs(angle[1])/max_rot])
+
+        d_t = max(t_lin,t_rot)
+
+        vel = Twist()
+        vel.linear.x = pose.position.x/d_t
+        vel.linear.y = pose.position.y/d_t
+        vel.linear.z = pose.position.z/d_t
+        vel.angular.x = angle[0]/d_t
+        vel.angular.y = angle[1]/d_t
+        vel.angular.z = angle[2]/d_t
+        
+        self._panda_vel_pub.publish(vel)
+        
+    def signal_handler(self, signal, frame):
+        sys.exit(0)
+
+if __name__ == "__main__":
+    rospy.init_node("mover")
+    mover = Mover()
+    signal.signal(signal.SIGINT, mover.signal_handler)
+    mover.run()

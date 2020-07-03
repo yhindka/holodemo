@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="panda_kinect" xmlns:xacro="http://ros.org/wiki/xacro">
+	<xacro:arg name="limited" default="true"/>
+
+	<!-- THE ROBOT -->
+
+	<!-- Panda Arm -->
+	<xacro:include filename="$(find demo)/urdfs/panda_arm_hand.urdf" ns="panda" />
+
+	<!-- Azure Kinect Camera-->
+	<xacro:include filename="$(find demo)/urdfs/edited_azure_kinect.urdf.xacro" />
+	<!--<xacro:sensor_d435 parent="panda_link8">
+		<origin xyz="-0.032 0.038 0.031" rpy="-2.731 -1.517 -1.209" />
+	</xacro:sensor_d435>-->
+
+</robot>
