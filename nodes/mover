@@ -18,7 +18,6 @@ class Mover(object):
         self._br = tf.TransformBroadcaster()
 
         self._panda_vel_pub = rospy.Publisher("/mover/cart_vel",Twist,queue_size=5)
-        self._cube_sub = rospy.Subscriber("/cube_pose", PoseStamped, self.on_cube)
 
         rospy.sleep(1.) # sleep a bit to make sure the TF cache is filled
 
@@ -27,19 +26,37 @@ class Mover(object):
 
  
     def run(self):
-        rospy.spin()
+        r = rospy.Rate(self._freq)
+        while not rospy.is_shutdown():
+            self.move()
+            r.sleep()
 
-    def on_cube(self, msg):
-        goal = copy.deepcopy(msg)
-        goal.pose.position.x=1.5 - msg.pose.position.x - .025
-        goal.pose.position.y=-msg.pose.position.y + .0
-        goal.pose.position.z=msg.pose.position.z+1 - .05
+    def move(self):
+        try:
+            (trans,rot) = self._tl.lookupTransform("panda", "cube", rospy.Time(0))
+        except:
+            return
+        #self._br.sendTransform(trans,rot,rospy.Time.now(),"goal","panda_link0")
+
+        goal = PoseStamped()
+        goal.pose.position.x=trans[0]
+        goal.pose.position.y=trans[1]
+        goal.pose.position.z=trans[2]
+        goal.pose.orientation.x=rot[0]
+        goal.pose.orientation.y=rot[1]
+        goal.pose.orientation.z=rot[2]
+        goal.pose.orientation.w=rot[3]
         goal.header.frame_id = "panda_link0"
         p = goal.pose.position
         o = goal.pose.orientation
+        #o.x=-o.x
+        #o.y = -o.y
         self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"goal","panda_link0")
         ee_frame = 'sim_end_effector'
-        (trans,rot) = self._tl.lookupTransform("panda_link0", ee_frame, rospy.Time(0))
+        try:
+            (trans,rot) = self._tl.lookupTransform("panda_link0", ee_frame, rospy.Time(0))
+        except:
+            pass
         pose = Pose()
         pose.position.x = goal.pose.position.x-trans[0]
         pose.position.y = goal.pose.position.y-trans[1]
@@ -73,7 +90,7 @@ class Mover(object):
 
         d = np.sqrt(dx**2+dy**2+dz**2)
         t_lin = d / max_lin
-        t_rot = 0# max([np.fabs(angle[0])/max_rot,np.fabs(angle[1])/max_rot])
+        t_rot =  max([np.fabs(angle[0])/max_rot,np.fabs(angle[1])/max_rot])
 
         d_t = max(t_lin,t_rot)
         vel = Twist()
@@ -81,9 +98,9 @@ class Mover(object):
             vel.linear.x = pose.position.x/d_t
             vel.linear.y = pose.position.y/d_t
             vel.linear.z = pose.position.z/d_t
-            #vel.angular.x = angle[0]/d_t
-            #vel.angular.y = angle[1]/d_t
-            #vel.angular.z = angle[2]/d_t
+            vel.angular.x = angle[0]/d_t
+            vel.angular.y = angle[1]/d_t
+            vel.angular.z = angle[2]/d_t
         
         self._panda_vel_pub.publish(vel)
         

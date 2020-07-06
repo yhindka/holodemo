@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+import rospy
+import tf
+from geometry_msgs.msg import PoseStamped
+import signal
+
+
+class Broadcaster(object):
+    def __init__(self):
+        self._tl = tf.TransformListener()
+        self._br = tf.TransformBroadcaster()
+
+        self._cube_sub = rospy.Subscriber("/cube_pose", PoseStamped, self.on_cube)
+        self._cube_sub = rospy.Subscriber("/panda_pose", PoseStamped, self.on_panda)
+        rospy.sleep(1.) # sleep a bit to make sure the TF cache is filled
+ 
+    def run(self):
+        rospy.spin()
+
+    def on_cube(self, msg):
+        p = msg.pose.position
+        o = msg.pose.orientation
+        self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"cube","unity")
+
+    def on_panda(self, msg):
+        p = msg.pose.position
+        o = msg.pose.orientation
+        self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"panda","unity")
+        
+    def signal_handler(self, signal, frame):
+        sys.exit(0)
+
+if __name__ == "__main__":
+    rospy.init_node("broadcaster")
+    broadcaster = Broadcaster()
+    signal.signal(signal.SIGINT, broadcaster.signal_handler)
+    broadcaster.run()

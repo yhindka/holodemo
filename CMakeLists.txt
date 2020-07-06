@@ -87,6 +87,7 @@ catkin_install_python(PROGRAMS
     nodes/static_publisher
     nodes/viz_manager
     nodes/mover
+    nodes/pose_broadcaster
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(TARGETS pandaJacob
