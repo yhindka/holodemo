@@ -8,6 +8,7 @@ import PyKDL
 import copy
 
 from geometry_msgs.msg import Twist, Pose, PoseStamped
+from std_msgs.msg import String
 
 import numpy as np 
 
@@ -17,12 +18,19 @@ class Mover(object):
         self._tl = tf.TransformListener()
         self._br = tf.TransformBroadcaster()
 
-        self._panda_vel_pub = rospy.Publisher("/mover/cart_vel",Twist,queue_size=5)
+        self._sim = False
+        vel_top = "/mover/cart_vel"
+        if not self._sim:
+            vel_top = "/panda/cart_vel"
+        self._panda_vel_pub = rospy.Publisher(vel_top,Twist,queue_size=5)
+        self._com_sub = rospy.Subscriber("/command", String, self.on_command)
+        self._command_pub = rospy.Publisher("/panda/commands", String, queue_size=1)
 
         rospy.sleep(1.) # sleep a bit to make sure the TF cache is filled
 
-        self._freq = 100.
+        self._freq = 200.
         self.goal = None
+        self._gripper_open = True
 
  
     def run(self):
@@ -30,11 +38,26 @@ class Mover(object):
         while not rospy.is_shutdown():
             self.move()
             r.sleep()
+    
+    def on_command(self,msg):
+        print(msg.data)
+        if msg.data == "gripper":
+            cmd = String()
+            if self._gripper_open:
+                cmd.data = "grasp"
+                self._gripper_open = False
+            else:
+                cmd.data = "release"
+                self._gripper_open = True
+            
+            self._command_pub.publish(cmd)
+
 
     def move(self):
         try:
             (trans,rot) = self._tl.lookupTransform("panda", "cube", rospy.Time(0))
         except:
+            print("No unity transform")
             return
         #self._br.sendTransform(trans,rot,rospy.Time.now(),"goal","panda_link0")
 
@@ -53,10 +76,12 @@ class Mover(object):
         #o.y = -o.y
         self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"goal","panda_link0")
         ee_frame = 'sim_end_effector'
+        if not self._sim:
+            ee_frame = "end_effector"
         try:
             (trans,rot) = self._tl.lookupTransform("panda_link0", ee_frame, rospy.Time(0))
         except:
-            pass
+            print("no transform with "+ee_frame)
         pose = Pose()
         pose.position.x = goal.pose.position.x-trans[0]
         pose.position.y = goal.pose.position.y-trans[1]
@@ -94,7 +119,15 @@ class Mover(object):
 
         d_t = max(t_lin,t_rot)
         vel = Twist()
-        if d_t > .05:
+        
+        threshold = .005
+        dx = math.fabs(pose.position.x)
+        dy = math.fabs(pose.position.y)
+        dz = math.fabs(pose.position.z)
+
+        if dx < threshold and dy < threshold and dz <threshold and math.fabs(angle[0])<.1 and math.fabs(angle[1])<.1 and math.fabs(angle[2])<.1:
+            pass
+        else:
             vel.linear.x = pose.position.x/d_t
             vel.linear.y = pose.position.y/d_t
             vel.linear.z = pose.position.z/d_t

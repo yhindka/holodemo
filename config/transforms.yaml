@@ -11,4 +11,4 @@ jungle_transform: 0.619975368493 -0.226304921687 0.00120209212324 -0.02371427982
 relaxed_ik_transform: 0.306323448384 -0.00012161987809 0.487079171779 0 0 0 1 panda_link0
   rel_ik_zero
 rgb_camera_transform: -0.004 -0.032 -0.000 0.503 -0.500 0.499 -0.498 camera_base rgb_camera_link
-sim_ee_transform: 0 0 0.1033995 1 0 0 0 panda_hand end_effector
+sim_ee_transform: 0 0 0.1033995 1 0 0 0 panda_hand sim_end_effector
