@@ -357,7 +357,7 @@ int main(int argc, char **argv)
   angles_pub = new ros::Publisher(n.advertise<sensor_msgs::JointState>("/jacob/joint_vel", 10));
 
   ros::Subscriber vel_sub = n.subscribe<geometry_msgs::Twist>("/mover/cart_vel", 10, on_vel);
-  ros::Subscriber joint_sub = n.subscribe<sensor_msgs::JointState>("/viz/joint_states", 10, on_joint);
+  ros::Subscriber joint_sub = n.subscribe<sensor_msgs::JointState>("/joint_states", 10, on_joint);
 
   ros::spin();
   return 0;

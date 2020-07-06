@@ -160,12 +160,12 @@
   <link name="ft_sensor_link">
     <visual>
       <geometry>
-        <mesh filename="package://demo/meshes/force_torque_sensor.dae"/>
+        <mesh filename="package://holodemo/meshes/force_torque_sensor.dae"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://demo/meshes/force_torque_sensor.stl"/>
+        <mesh filename="package://holodemo/meshes/force_torque_sensor.stl"/>
       </geometry>
     </collision>
   </link>

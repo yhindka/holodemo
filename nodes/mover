@@ -30,14 +30,11 @@ class Mover(object):
         rospy.spin()
 
     def on_cube(self, msg):
-        msg.pose.position.y+=1
-        msg.pose.position.z+=1
         goal = copy.deepcopy(msg)
-        goal.pose.position.x=msg.pose.position.y
-        goal.pose.position.y=msg.pose.position.z
-        goal.pose.position.z=msg.pose.position.x
+        goal.pose.position.x=1.5 - msg.pose.position.x - .025
+        goal.pose.position.y=-msg.pose.position.y + .0
+        goal.pose.position.z=msg.pose.position.z+1 - .05
         goal.header.frame_id = "panda_link0"
-        print(goal)
         p = goal.pose.position
         o = goal.pose.orientation
         self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"goal","panda_link0")
@@ -76,17 +73,17 @@ class Mover(object):
 
         d = np.sqrt(dx**2+dy**2+dz**2)
         t_lin = d / max_lin
-        t_rot = max([np.fabs(angle[0])/max_rot,np.fabs(angle[1])/max_rot])
+        t_rot = 0# max([np.fabs(angle[0])/max_rot,np.fabs(angle[1])/max_rot])
 
         d_t = max(t_lin,t_rot)
-
         vel = Twist()
-        vel.linear.x = pose.position.x/d_t
-        vel.linear.y = pose.position.y/d_t
-        vel.linear.z = pose.position.z/d_t
-        vel.angular.x = angle[0]/d_t
-        vel.angular.y = angle[1]/d_t
-        vel.angular.z = angle[2]/d_t
+        if d_t > .05:
+            vel.linear.x = pose.position.x/d_t
+            vel.linear.y = pose.position.y/d_t
+            vel.linear.z = pose.position.z/d_t
+            #vel.angular.x = angle[0]/d_t
+            #vel.angular.y = angle[1]/d_t
+            #vel.angular.z = angle[2]/d_t
         
         self._panda_vel_pub.publish(vel)
         

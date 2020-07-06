@@ -19,7 +19,7 @@ class Visualization(object):
         self._finger_val = .035
         self._current_joint = [0.0,-0.4,0.0,-2.0,0.0,1.6,0.8,self._finger_val,self._finger_val]
         self._names = ["panda_joint1", "panda_joint2","panda_joint3","panda_joint4","panda_joint5","panda_joint6","panda_joint7","panda_finger_joint1","panda_finger_joint2"]
-        self._viz_pub = rospy.Publisher("/viz/joint_states", JointState, queue_size = 5)
+        self._viz_pub = rospy.Publisher("/joint_states", JointState, queue_size = 5)
         
         #Publish init state for the robot
         rospy.sleep(1)
@@ -32,6 +32,7 @@ class Visualization(object):
         self._current_velocity = [0.,0.,0.,0.,0.,0.,0.,0.,0.]
         self._freq = 200
         self._vel_sub = rospy.Subscriber("/jacob/joint_vel", JointState, self.on_vel)
+        self._com_sub = rospy.Subscriber("/command", String, self.on_command)
 
     def publish_states(self):
         joint = JointState()
@@ -48,16 +49,14 @@ class Visualization(object):
             r.sleep()
 
     def on_command(self, msg):
-        if self._sim:
-            if msg.data == "grasp":
+        if msg.data == "gripper":
+            if self._finger_val == 0.0:
+                self._finger_val = 0.035
+            else:  
                 self._finger_val = 0.0
-                self._current_joint[-1] = self._finger_val
-                self._current_joint[-2] = self._finger_val
-            if msg.data == "release":
-                self._finger_val = .035
-                self._current_joint[-1] = self._finger_val
-                self._current_joint[-2] = self._finger_val
-    
+            self._current_joint[-1] = self._finger_val
+            self._current_joint[-2] = self._finger_val
+            
     #Velocity controller
     def on_vel(self,msg): 
         for i,v in enumerate(msg.velocity):

@@ -10,7 +10,7 @@ rospy.init_node('static_tf2_broadcaster')
 rospack = rospkg.RosPack()
 f=rospy.get_param('~file_name')
 transform = rospy.get_param('~transform')
-path = rospack.get_path('demo')+'/config/'+f
+path = rospack.get_path('holodemo')+'/config/'+f
 with open(path) as f:
     doc = yaml.full_load(f)
 
