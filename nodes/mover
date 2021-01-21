@@ -18,7 +18,7 @@ class Mover(object):
         self._tl = tf.TransformListener()
         self._br = tf.TransformBroadcaster()
 
-        self._sim = False
+        self._sim = True
         vel_top = "/mover/cart_vel"
         if not self._sim:
             vel_top = "/panda/cart_vel"
