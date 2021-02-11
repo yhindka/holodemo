@@ -13,9 +13,9 @@
 
     <node pkg="holodemo" type="pose_broadcaster" name="pose_broadcaster" output="screen"/>
 
-    <node pkg="holodemo" type="test_path.py" name="path_test" output="screen"/>
+    <node pkg="holodemo" type="path.py" name="path_test" output="screen"/>
 
-    <node pkg="holodemo" type="test_text.py" name="text_node" output="screen"/>
+    <node pkg="holodemo" type="distance_text.py" name="text_node" output="screen"/>
 
 
     <node pkg="holodemo" type="static_publisher" name="end_effector_static_publisher">
