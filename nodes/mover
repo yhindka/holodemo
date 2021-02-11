@@ -25,6 +25,7 @@ class Mover(object):
         self._panda_vel_pub = rospy.Publisher(vel_top,Twist,queue_size=5)
         self._com_sub = rospy.Subscriber("/command", String, self.on_command)
         self._command_pub = rospy.Publisher("/panda/commands", String, queue_size=1)
+        self._goal_pub = rospy.Publisher("/panda/goal", PoseStamped, queue_size=1)
 
         rospy.sleep(1.) # sleep a bit to make sure the TF cache is filled
 
@@ -72,6 +73,8 @@ class Mover(object):
         goal.header.frame_id = "panda_link0"
         p = goal.pose.position
         o = goal.pose.orientation
+
+        self._goal_pub.publish(goal)
         #o.x=-o.x
         #o.y = -o.y
         self._br.sendTransform((p.x,p.y,p.z),(o.x,o.y,o.z,o.w),rospy.Time.now(),"goal","panda_link0")
