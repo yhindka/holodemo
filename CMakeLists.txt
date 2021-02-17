@@ -11,7 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
         image_transport 
         visualization_msgs
         image_geometry 
-        nodelet)
+        nodelet
+	message_generation)
 
 ## System dependencies
 find_package(OpenCV REQUIRED)
@@ -22,6 +23,16 @@ message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 if(2.9.0 VERSION_GREATER ${OpenCV_VERSION})
     message(FATAL "OpenCV3 required!")
 endif()
+
+add_message_files(
+  FILES
+  zone.msg
+)
+
+generate_messages(
+  DEPENDENCIES 
+)
+
 
 ###################################
 ## catkin specific configuration ##
@@ -37,9 +48,11 @@ catkin_package(
   CATKIN_DEPENDS 
     tf
     nodelet
+    message_runtime
   DEPENDS OpenCV
   LIBRARIES 
 )
+
 
 
 ###########
