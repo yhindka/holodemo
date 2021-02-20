@@ -27,6 +27,7 @@ endif()
 add_message_files(
   FILES
   zone.msg
+  custom_text.msg
 )
 
 generate_messages(

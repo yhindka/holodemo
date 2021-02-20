@@ -19,6 +19,8 @@
 
     <node pkg="holodemo" type="zone_list.py" name="zone_list" output="screen"/>
 
+    <node pkg="holodemo" type="text_list.py" name="text_list" output="screen"/>
+
 
 
 

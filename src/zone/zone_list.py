@@ -7,15 +7,17 @@ from holodemo.msg import zone
 from Zone import Zone
 
 
+bag_path = '/home/user/catkin_ws/src/holodemo/src/bags/zone.bag'
+temp_path = '/home/user/catkin_ws/src/holodemo/src/bags/temp.bag'
 
 
 def addZone(zone):
 
     addBag = None    
     try: 
-        addBag = rosbag.Bag('zone.bag', 'a')
+        addBag = rosbag.Bag(bag_path, 'a')
     except Exception as e:
-        addBag = rosbag.Bag('zone.bag', 'w')
+        addBag = rosbag.Bag(bag_path, 'w')
 
     addBag.write('/zone_bag', zone)
     addBag.close()
@@ -23,7 +25,7 @@ def addZone(zone):
 def getZone(name):
     
     try:
-        getBag = rosbag.Bag('zone.bag', 'r')
+        getBag = rosbag.Bag(bag_path, 'r')
     except Exception as e:
         print("Bag does not exist")
         return
@@ -38,8 +40,8 @@ def transferToTemp():
 
     # transfer messages to temporary bag
     try:
-        getBag = rosbag.Bag('zone.bag', 'r')
-        tempBag = rosbag.Bag('temp.bag', 'w')
+        getBag = rosbag.Bag(bag_path, 'r')
+        tempBag = rosbag.Bag(temp_path, 'w')
     except Exception as e:
         print("Bag does not exist or cannot be created")
         return
@@ -56,8 +58,8 @@ def updateZone(name, updatedMsg):
 
     # transfer messages back to actual bag
     try:
-        getBag = rosbag.Bag('zone.bag', 'w')
-        tempBag = rosbag.Bag('temp.bag', 'r')
+        getBag = rosbag.Bag(bag_path, 'w')
+        tempBag = rosbag.Bag(temp_path, 'r')
     except Exception as e:
         print("Error with bags")
         return
@@ -77,8 +79,8 @@ def deleteZone(name):
 
     # transfer messages back to actual bag
     try:
-        getBag = rosbag.Bag('zone.bag', 'w')
-        tempBag = rosbag.Bag('temp.bag', 'r')
+        getBag = rosbag.Bag(bag_path, 'w')
+        tempBag = rosbag.Bag(temp_path, 'r')
     except Exception as e:
         print("Error with bags")
         return
