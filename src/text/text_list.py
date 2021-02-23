@@ -17,11 +17,74 @@ def addText(msg):
 
     addBag.write('/text_bag', msg)
     addBag.close()
+
+def getText(name):
+
+    try:
+        getBag = rosbag.Bag(bag_path, 'r')
+    except Exception as e1:
+        print("Bag does not exist")
+
+    for topic, msg, t in getBag.read_messages(topics=['/text_bag']):
+        if msg.name == name:
+            return msg
+    getBag.close()
+
+def transferToTemp():
+
+
+    # transfer messages to temporary bag
+    try:
+        getBag = rosbag.Bag(bag_path, 'r')
+        tempBag = rosbag.Bag(temp_path, 'w')
+    except Exception as e:
+        print("Bag does not exist or cannot be created")
+        return
+
+    for topic, msg, t in getBag.read_messages(topics=['/text_bag']):
+        tempBag.write(topic, msg, t)
+    tempBag.close()
+    getBag.close()
+
+
+def updateText(name, updatedMsg):
+
+    transferToTemp()
+
+    try:
+        getBag = rosbag.Bag(bag_path, 'w')
+        tempBag = rosbag.Bag(temp_path, 'r')
+    except Exception as e1:
+        print("Error with bags")
+
+    for topic, msg, t in tempBag.read_messages(topics=['/text_bag']):
+        # write updated message
+        if msg.name == name:
+            getBag.write(topic, updatedMsg, t)
+        else:
+            getBag.write(topic, msg, t)
+    getBag.close()
+    tempBag.close()
+
+def deleteText(name):
+
+    transferToTemp()
+
+    try:
+        getBag = rosbag.Bag(bag_path, 'w')
+        tempBag = rosbag.Bag(temp_path, 'r')
+    except Exception as e1:
+        print("Error with bags")
+
+    for topic, msg, t in tempBag.read_messages(topics=['/text_bag']):
+        # skip message to delete
+        if msg.name != name:
+            getBag.write(topic, msg, t)
+    getBag.close()
+    tempBag.close()
     
 
 if __name__ == "__main__":
-
-
 
 
     rospy.init_node('text_list')

@@ -71,8 +71,10 @@ def zoneUpdate(name):
     currZone = getZone(name)
     if currZone == None:
         print("No zone with name: " + name)
+        return
 
 
+    print("initializing topic")
     pub = rospy.Publisher('/gui/update_zone', zone, queue_size=1)
     namePub = rospy.Publisher('/prev_name', String, queue_size=1)
 
@@ -105,15 +107,16 @@ def zoneUpdate(name):
 
 
 def zoneDelete(name):
-   
-    pub = rospy.Publisher('/gui/delete_zone', String, queue_size=1)
-    print("initializing topic")
-    time.sleep(1)
-
+    
     # check if zone exists
     currZone = getZone(name)
     if currZone == None:
         print("No zone with name: " + name)
+  
+    print("initializing topic")
+    pub = rospy.Publisher('/gui/delete_zone', String, queue_size=1)
+    time.sleep(1)
+
 
     deleteZone(name)
     msg = String()
