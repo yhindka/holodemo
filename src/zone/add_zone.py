@@ -36,6 +36,8 @@ def zoneAdd():
     msg.posy = float(input("Enter y position of zone: "))
     msg.posz = float(input("Enter z position of zone: "))
 
+    # TODO ColorRGBA
+
     dang = input("Is this a danger zone? y/n ")
     if (dang == 'y'):
         msg.danger = 1
@@ -134,7 +136,7 @@ if __name__ == "__main__":
         sys.exit(1)
     for opt, arg in opts:
         if opt == '-h':
-            print("Use -c to create zone, -u <zone_number> to update, or -d <zone_number> to delete")
+            print("Use -c to create zone, -g <zone_name> to get zone details, -u <zone_name> to update, or -d <zone_name> to delete")
             sys.exit(0)
         elif opt == '-c':
             if not initialized:

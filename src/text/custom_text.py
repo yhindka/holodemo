@@ -92,7 +92,7 @@ if __name__ == "__main__":
         sys.exit(1)
     for opt, arg in opts:
         if opt == '-h':
-            print("Use -c to create text, -u <text_number> to update, or -d <text_number> to delete")
+            print("Use -c to create text, -g <text_name> to get text details, -u <text_name> to update, or -d <text_name> to delete")
             sys.exit(0)
         elif opt == '-c':
             if not initialized:

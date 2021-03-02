@@ -28,6 +28,7 @@ add_message_files(
   FILES
   zone.msg
   custom_text.msg
+  mesh.msg
 )
 
 generate_messages(
