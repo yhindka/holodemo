@@ -23,7 +23,7 @@
 
     <node pkg="holodemo" type="mesh_list.py" name="mesh_list" output="screen"/>
 
-
+    <node pkg="holodemo" type="photo.py" name="photo_sub" output="screen"/>
 
 
 
