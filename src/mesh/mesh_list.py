@@ -22,11 +22,12 @@ def addMesh(mesh):
     addBag.close()
 
 def getMesh(name):
-    
+   
+    getBag = None
     try:
         getBag = rosbag.Bag(bag_path, 'r')
     except Exception as e:
-        print("Bag does not exist")
+        print("Bag does not exist. Normal if this is your first mesh.")
         return
     
     for topic, msg, t in getBag.read_messages(topics=['/mesh_bag']):

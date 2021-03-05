@@ -21,11 +21,16 @@ def textAdd():
     pub = rospy.Publisher('/gui/add_text', custom_text, queue_size=1)
 
     msg = custom_text()
+
+    msg.name = input("Enter name for this text object: ")
+    if (getText(msg.name) != None):
+        print("Text name already exists")
+        return
     msg.text = input("Enter text: ")
     msg.posx = float(input("Enter x position: "))
     msg.posy = float(input("Enter y position: "))
     msg.posz = float(input("Enter z position: "))
-    msg.name = input("Enter name for this text object: ")
+    
 
     addText(msg)
     pub.publish(msg)

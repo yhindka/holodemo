@@ -21,14 +21,17 @@ def init():
 
 
 def zoneAdd():
-   
-    
 
     print("initializing topic")
     pub = rospy.Publisher('/gui/create_zone', zone, queue_size=1)
     time.sleep(3)
 
     msg = zone()
+
+    msg.name = input("Enter name of zone: ")
+    if (getZone(msg.name) != None):
+        print("Zone name already exists")
+        return
 
     msg.dimx = int(input("Enter x dimension of zone: "))
     msg.dimz = int(input("Enter z dimension of zone: "))
@@ -47,7 +50,7 @@ def zoneAdd():
         rospy.signal_shutdown("Incorrect input. Shutting down node.")
         sys.exit(1)
 
-    msg.name = input("Enter name of zone: ")
+
 
     
     #toAdd = Zone(msg.dimx, msg.dimz, msg.posx, msg.posy, msg.posz, msg.danger)
@@ -81,7 +84,6 @@ def zoneUpdate(name):
     namePub = rospy.Publisher('/prev_name', String, queue_size=1)
 
     msg = zone()
-
     
     msg.name = input('Update name to? (Currently: ' + currZone.name + '): ')
     msg.dimx = int(input('Update x dimension to? (Currently: ' + str(currZone.dimx) + '): '))
@@ -114,6 +116,7 @@ def zoneDelete(name):
     currZone = getZone(name)
     if currZone == None:
         print("No zone with name: " + name)
+        return
   
     print("initializing topic")
     pub = rospy.Publisher('/gui/delete_zone', String, queue_size=1)

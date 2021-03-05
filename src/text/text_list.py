@@ -20,10 +20,12 @@ def addText(msg):
 
 def getText(name):
 
+    getBag = None
     try:
         getBag = rosbag.Bag(bag_path, 'r')
     except Exception as e1:
-        print("Bag does not exist")
+        print("Bag does not exist. Normal if this is your first text.")
+        return
 
     for topic, msg, t in getBag.read_messages(topics=['/text_bag']):
         if msg.name == name:

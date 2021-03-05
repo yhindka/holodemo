@@ -28,6 +28,11 @@ def meshAdd():
 
     msg = mesh()
 
+    msg.name = input("Enter name of mesh: ")
+    if (getMesh(msg.name) != None):
+        print("Mesh name already exists.")
+        return
+
     msg.posx = float(input("Enter x position of mesh: "))
     msg.posy = float(input("Enter y position of mesh: "))
     msg.posz = float(input("Enter z position of mesh: "))
@@ -36,7 +41,6 @@ def meshAdd():
     msg.rotz = float(input("Enter z rotation of mesh: "))
 
 
-    msg.name = input("Enter name of mesh: ")
 
     addMesh(msg)
     pub.publish(msg)

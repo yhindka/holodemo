@@ -27,7 +27,7 @@ def getZone(name):
     try:
         getBag = rosbag.Bag(bag_path, 'r')
     except Exception as e:
-        print("Bag does not exist")
+        print("Bag does not exist. Normal if this is your first zone.")
         return
     
     for topic, msg, t in getBag.read_messages(topics=['/zone_bag']):
