@@ -32,6 +32,21 @@
         <param name="transform" type="string" value="sim_ee_transform" />
     </node>
 
+
+    <include file="$(find ros_markers)/launch/detect.launch">
+	    <arg name="image_topic" value="/photo">
+		    <param name="~image_transport" type="str" value="compressed"/>
+	    </arg>
+	    <arg name="omit_other_tags" value="false"/>
+	    <arg name="markers_configuration" value="$(find ros_markers)/config/markers_config.yml"/>
+    </include>
+
+    <node pkg="image_transport" type="republish" name="republish" output="screen" args="compressed in:=/compressed_photo raw out:=/photo"/>
+    <param name="~image_transport" value="compressed"/>
+
+    <node pkg="holodemo" type="place_robot.py" name="place_robot" output="screen"/>
+
+
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find holodemo)/rviz/joint_viewer.rviz" />
 
     <param name="publish_frequency" type="double" value="100.0" />

@@ -29,6 +29,7 @@ add_message_files(
   zone.msg
   custom_text.msg
   mesh.msg
+  MyCameraInfo.msg
 )
 
 generate_messages(
