@@ -4,12 +4,12 @@ import rospy
 import tf
 from geometry_msgs.msg import Pose
 
-def getPose(tl):
+def getPose():
     
     trans = ()
     rot = ()
     try:
-        (trans, rot) = tl.lookupTransform("tag1", "Camera", rospy.Time(0))
+        (trans, rot) = tl.lookupTransform("Camera", "tag1", rospy.Time(0))
         msg = PoseStamped()
         msg.position.x = trans[0]
         msg.position.y = trans[1]
@@ -28,4 +28,4 @@ if __name__ == "__main__":
     tl = tf.TransformListener()
     pub = rospy.Publisher('/robot_pos', Pose, queue_size=1)
     while not rospy.is_shutdown():
-        getPose(tl)
+        getPose()
