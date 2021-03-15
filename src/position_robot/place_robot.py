@@ -18,10 +18,10 @@ def getPose():
         msg.orientation.x = trans.transform.rotation.x
         msg.orientation.y = trans.transform.rotation.y
         msg.orientation.z = trans.transform.rotation.z
+        print(trans)
         pub.publish(msg)
 
     except Exception as e:
-        print(e)
         pass
 
 def callback(msg):
